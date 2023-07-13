@@ -1,0 +1,29 @@
+<!-- views/index.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zodiac Sign Form - Results</title>
+</head>
+<body>
+  <h1>Zodiac Sign Form - Results</h1>
+
+  <% users.forEach(user => { %>
+    <h2>User: <%= user.name %></h2>
+
+    <ul>
+      <% user.answers.forEach(answer => { %>
+        <li><%= answer.question %>: <%= answer.answer %></li>
+      <% }) %>
+    </ul>
+  <% }) %>
+
+  <p>Download results:</p>
+  <ul>
+    <li><a href="/download/excel">Download Excel</a></li>
+    <li><a href="/download/csv">Download CSV</a></li>
+  </ul>
+</body>
+</html>
