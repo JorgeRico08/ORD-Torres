@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const Data = require('../models/Question_Model');
-
+const Swal = require('sweetalert2');
 /* GET home page. */
 // Ruta principal - Muestra todas las preguntas
 // router.get('/', async (req, res) => {
@@ -31,13 +31,20 @@ const Data = require('../models/Question_Model');
 // });
 
 // Ruta principal - Muestra el formulario de registro
-router.get('/', (req, res) => {
-  res.render('index');
+router.get('/', async (req, res) => {
+  try {
+    res.render('index');
+  } catch (error) {
+    // Manejar errores en caso de que ocurran durante la operación de carga
+    console.log(error)
+    res.status(500).send('Ocurrió un error durante la carga');
+  }
 });
+
 
 router.post('/submit', async (req, res) => {
   try {
-    const { name, date } = req.body;
+    const { name, email } = req.body;
     const answers = [];
 
     // Recorrer las respuestas del formulario y almacenarlas en el formato deseado
@@ -46,15 +53,13 @@ router.post('/submit', async (req, res) => {
       const answer = parseInt(req.body[`answer${i}`]);
       answers.push({ question, answer });
     }
-    console.log(answers)
 
     // Crear un nuevo usuario con los datos recibidos
-    const user = new Data({ name, date, answers });
-    
-    console.log(user)
+    const user = new Data({ name, email, answers });
+  
     // Guardar el usuario en la base de datos
     await user.save();
-    res.redirect('/success')
+    res.redirect('/')
   } catch (error) {
     console.error('Error submitting form:', error);
     res.status(500).send('Server error');
@@ -77,7 +82,7 @@ router.post('/submit', async (req, res) => {
 // });
 
 // // Ruta de éxito - Muestra el signo zodiacal del usuario registrado
-router.get('/success', async (req, res) => {
+router.get('/success/1220100446', async (req, res) => {
   try {
     const users = await Data.find();
 
@@ -200,13 +205,13 @@ router.get('/download/excel', async (req, res) => {
     const worksheet = workbook.addWorksheet('Users');
 
     // Escribir los encabezados en el archivo Excel
-    worksheet.addRow(['Name', 'fechaNac','Answer 1', 'Answer 2','Answer 3', 'Answer 4','Answer 5', 'Answer 6','Answer 7', 'Answer 8','Answer 9', 'Answer 10','Answer 11', 'Answer 12','Answer 13', 'Answer 14','Answer 15' /* Agrega aquí las preguntas restantes */]);
+    worksheet.addRow(['Name', 'Email','Answer 1', 'Answer 2','Answer 3', 'Answer 4','Answer 5', 'Answer 6','Answer 7', 'Answer 8','Answer 9', 'Answer 10','Answer 11', 'Answer 12','Answer 13', 'Answer 14','Answer 15' /* Agrega aquí las preguntas restantes */]);
 
     // Escribir los datos en el archivo Excel
     users.forEach(user => {
       const userData = [user.name];
 
-      userData.push(user.date);// Agregar el campo 'date'
+      userData.push(user.email);// Agregar el campo 'date'
 
       user.answers.forEach(answer => {
         userData.push(answer.answer);
@@ -304,12 +309,12 @@ router.get('/download/csv', async (req, res) => {
     const csvData = [];
 
     // Agregar encabezados
-    csvData.push(['Name', 'fechaNac','Answer 1', 'Answer 2','Answer 3', 'Answer 4','Answer 5', 'Answer 6','Answer 7', 'Answer 8','Answer 9', 'Answer 10','Answer 11', 'Answer 12','Answer 13', 'Answer 14','Answer 15' /* Agrega aquí las preguntas restantes */]);
+    csvData.push(['Name', 'Email','Answer 1', 'Answer 2','Answer 3', 'Answer 4','Answer 5', 'Answer 6','Answer 7', 'Answer 8','Answer 9', 'Answer 10','Answer 11', 'Answer 12','Answer 13', 'Answer 14','Answer 15' /* Agrega aquí las preguntas restantes */]);
 
     // Agregar los datos de los usuarios
     users.forEach(user => {
       const userData = [user.name];
-      userData.push(user.date);
+      userData.push(user.email);
       user.answers.forEach(answer => {
         userData.push(answer.answer);
       });

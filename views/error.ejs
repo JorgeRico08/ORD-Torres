@@ -1,3 +1,16 @@
-<h1><%= message %></h1>
-<h2><%= error.status %></h2>
-<pre><%= error.stack %></pre>
+<link rel="stylesheet" href="/css/error.css">
+<div class="conten">
+    <div class="conten__img">
+        <img src="/images/404.png" alt="Error">
+        <p class="conten__number">
+            404
+        </p>
+    </div>
+    <div class="conten__Description">
+        <h5 class="conten__error"><%= error.status %> Error</h5>
+
+            <h5 class="conten__error">Algo salió mal intenta más tarde...</h5>
+        
+        <a href="/" class="conten__button">Clic aquí para ir a la página de inicio</a>
+    </div>
+</div>

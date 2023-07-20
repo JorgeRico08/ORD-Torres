@@ -3,11 +3,11 @@ const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
   name: { type: String },
-  date: { type: String },
+  email: { type: String },
   answers: [
     {
       question: { type: String },
-      answer: { type: Number, min: 1, max: 2 },
+      answer: { type: Number, min: 1, max: 6 },
     },
   ],
 });
