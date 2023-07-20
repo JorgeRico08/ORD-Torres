@@ -2,11 +2,12 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
+  name: { type: String },
+  date: { type: String },
   answers: [
     {
-      question: { type: String, required: true },
-      answer: { type: Number, min: 1, max: 4 },
+      question: { type: String },
+      answer: { type: Number, min: 1, max: 2 },
     },
   ],
 });

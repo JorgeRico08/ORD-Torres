@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const User = require('../models/prueba');
-const Data = require('../models/ejemplo2');
+const Data = require('../models/Question_Model');
 
 /* GET home page. */
 // Ruta principal - Muestra todas las preguntas
@@ -38,7 +37,7 @@ router.get('/', (req, res) => {
 
 router.post('/submit', async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, date } = req.body;
     const answers = [];
 
     // Recorrer las respuestas del formulario y almacenarlas en el formato deseado
@@ -47,23 +46,21 @@ router.post('/submit', async (req, res) => {
       const answer = parseInt(req.body[`answer${i}`]);
       answers.push({ question, answer });
     }
-
     console.log(answers)
+
     // Crear un nuevo usuario con los datos recibidos
-    const user = new Data({ name, answers });
+    const user = new Data({ name, date, answers });
     
+    console.log(user)
     // Guardar el usuario en la base de datos
-    const data = await user.save();
-    console.log(data)
-
+    await user.save();
     res.redirect('/success')
-
-    res.send('Form submitted successfully');
   } catch (error) {
     console.error('Error submitting form:', error);
     res.status(500).send('Server error');
   }
 });
+
 
 // // Ruta para procesar el formulario de registro
 // router.post('/', async (req, res) => {
@@ -203,11 +200,13 @@ router.get('/download/excel', async (req, res) => {
     const worksheet = workbook.addWorksheet('Users');
 
     // Escribir los encabezados en el archivo Excel
-    worksheet.addRow(['Name', 'Answer 1', 'Answer 2','Answer 3', 'Answer 4','Answer 5', 'Answer 6','Answer 7', 'Answer 8','Answer 9', 'Answer 10','Answer 11', 'Answer 12','Answer 13', 'Answer 14','Answer 15' /* Agrega aquí las preguntas restantes */]);
+    worksheet.addRow(['Name', 'fechaNac','Answer 1', 'Answer 2','Answer 3', 'Answer 4','Answer 5', 'Answer 6','Answer 7', 'Answer 8','Answer 9', 'Answer 10','Answer 11', 'Answer 12','Answer 13', 'Answer 14','Answer 15' /* Agrega aquí las preguntas restantes */]);
 
     // Escribir los datos en el archivo Excel
     users.forEach(user => {
       const userData = [user.name];
+
+      userData.push(user.date);// Agregar el campo 'date'
 
       user.answers.forEach(answer => {
         userData.push(answer.answer);
@@ -219,9 +218,12 @@ router.get('/download/excel', async (req, res) => {
     // Configurar el encabezado de respuesta para descargar el archivo Excel
     res.setHeader(
       'Content-Type',
-      'Routerlication/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     );
-    res.setHeader('Content-Disposition', 'attachment; filename=users.xlsx');
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename="' + encodeURIComponent('exel-respuestas.xlsx') + '"'
+    );
 
     // Guardar el archivo Excel en la respuesta
     await workbook.xlsx.write(res);
@@ -233,60 +235,105 @@ router.get('/download/excel', async (req, res) => {
 });
 
 // Ruta para descargar el archivo CSV
+// router.get('/download/csv', async (req, res) => {
+//   try {
+//     const users = await Data.find(); // Obtener todos los usuarios de la base de datos
+//     // Obtener la fecha actual para incluirla en el nombre del archivo CSV
+
+//     // Configurar el encabezado de respuesta para descargar el archivo CSV
+//     res.setHeader('Content-Type', 'text/csv');
+//     res.setHeader(
+//       'Content-Disposition',
+//       'attachment; filename="' + encodeURIComponent('users.csv') + '"'
+//     );
+//     // Crear el escritor CSV y escribir los datos en el archivo CSV
+//     const csvWriter = createCsvWriter({
+//       path: 'users.csv',
+//       header: [
+//         { id: 'name', title: 'Nombre' },
+//         { id: 'date', title: 'FechaNac' },
+//         { id: 'answer1', title: 'Answer 1' },
+//         { id: 'answer2', title: 'Answer 2' },
+//         { id: 'answer3', title: 'Answer 3' },
+//         { id: 'answer4', title: 'Answer 4' },
+//         { id: 'answer5', title: 'Answer 5' },
+//         { id: 'answer6', title: 'Answer 6' },
+//         { id: 'answer7', title: 'Answer 7' },
+//         { id: 'answer8', title: 'Answer 8' },
+//         { id: 'answer9', title: 'Answer 9' },
+//         { id: 'answer10', title: 'Answer 10' },
+//         { id: 'answer11', title: 'Answer 11' },
+//         { id: 'answer12', title: 'Answer 12' },
+//         { id: 'answer13', title: 'Answer 13' },
+//         { id: 'answer14', title: 'Answer 14' },
+//         { id: 'answer15', title: 'Answer 15' },
+//         // Agrega aquí las preguntas restantes
+//       ],
+//     });
+
+//     // Escribir los datos en el archivo CSV
+//     const csvRecords = [];
+//     users.forEach(user => {
+//       const csvRecord = {
+//         name: user.name
+//       };
+
+//       csvRecord.date = user.date;
+
+//       user.answers.forEach((answer, index) => {
+//         csvRecord[`answer${index + 1}`] = answer.answer;
+//       });
+
+//       csvRecords.push(csvRecord);
+//     });
+
+//     await csvWriter.writeRecords(csvRecords);
+//     res.download('users.csv');
+//   } catch (error) {
+//     console.error('Error generating CSV file:', error);
+//     res.status(500).send('Server error');
+//   }
+// });
+
+// Ruta para descargar el archivo CSV
 router.get('/download/csv', async (req, res) => {
   try {
     const users = await Data.find(); // Obtener todos los usuarios de la base de datos
 
-    // Configurar el encabezado de respuesta para descargar el archivo CSV
-    res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', 'attachment; filename=users.csv');
+    // Crear el contenido del archivo CSV
+    const csvData = [];
 
-    // Crear el escritor CSV y escribir los datos en el archivo CSV
-    const csvWriter = createCsvWriter({
-      path: 'users.csv',
-      header: [
-        { id: 'name', title: 'Name' },
-        { id: 'answer1', title: 'Answer 1' },
-        { id: 'answer2', title: 'Answer 2' },
-        { id: 'answer3', title: 'Answer 3' },
-        { id: 'answer4', title: 'Answer 4' },
-        { id: 'answer5', title: 'Answer 5' },
-        { id: 'answer6', title: 'Answer 6' },
-        { id: 'answer7', title: 'Answer 7' },
-        { id: 'answer8', title: 'Answer 8' },
-        { id: 'answer9', title: 'Answer 9' },
-        { id: 'answer10', title: 'Answer 10' },
-        { id: 'answer11', title: 'Answer 11' },
-        { id: 'answer12', title: 'Answer 12' },
-        { id: 'answer13', title: 'Answer 13' },
-        { id: 'answer14', title: 'Answer 14' },
-        { id: 'answer15', title: 'Answer 15' },
-        // Agrega aquí las preguntas restantes
-      ],
-    });
+    // Agregar encabezados
+    csvData.push(['Name', 'fechaNac','Answer 1', 'Answer 2','Answer 3', 'Answer 4','Answer 5', 'Answer 6','Answer 7', 'Answer 8','Answer 9', 'Answer 10','Answer 11', 'Answer 12','Answer 13', 'Answer 14','Answer 15' /* Agrega aquí las preguntas restantes */]);
 
-    // Escribir los datos en el archivo CSV
-    const csvRecords = [];
+    // Agregar los datos de los usuarios
     users.forEach(user => {
-      const csvRecord = {
-        name: user.name,
-      };
-
-      user.answers.forEach((answer, index) => {
-        csvRecord[`answer${index + 1}`] = answer.answer;
+      const userData = [user.name];
+      userData.push(user.date);
+      user.answers.forEach(answer => {
+        userData.push(answer.answer);
       });
 
-      csvRecords.push(csvRecord);
+      csvData.push(userData);
     });
 
-    await csvWriter.writeRecords(csvRecords);
-    res.download('users.csv');
+    // Configurar el encabezado de respuesta para descargar el archivo CSV
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename="' + encodeURIComponent('users.csv') + '"'
+    );
+
+    // Convertir los datos del CSV a una cadena
+    const csvString = csvData.map(row => row.join(',')).join('\n');
+
+    // Enviar la cadena CSV al cliente
+    res.send(csvString);
   } catch (error) {
     console.error('Error generating CSV file:', error);
     res.status(500).send('Server error');
   }
 });
-
 
 
 module.exports = router;

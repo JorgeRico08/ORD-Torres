@@ -11,7 +11,8 @@
   <h1>Resultados de Formulario signo del Zodiaco</h1>
 
   <% users.forEach(user => { %>
-    <h2>User: <%= user.name %></h2>
+    <h2>Usuario: <%= user.name %></h2>
+    <h5>Cumpleaños: <%= user.date %></h2>
 
     <ul>
       <% user.answers.forEach(answer => { %>
