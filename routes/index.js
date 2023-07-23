@@ -205,17 +205,31 @@ router.get('/download/excel', async (req, res) => {
     const worksheet = workbook.addWorksheet('Users');
 
     // Escribir los encabezados en el archivo Excel
-    worksheet.addRow(['Name', 'Email','Answer 1', 'Answer 2','Answer 3', 'Answer 4','Answer 5', 'Answer 6','Answer 7', 'Answer 8','Answer 9', 'Answer 10','Answer 11', 'Answer 12','Answer 13', 'Answer 14','Answer 15' /* Agrega aquí las preguntas restantes */]);
+    worksheet.addRow(['Name', 'Email','Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo']);
 
     // Escribir los datos en el archivo Excel
     users.forEach(user => {
-      const userData = [user.name];
+      const userData = [user.name, user.email];
 
-      userData.push(user.email);// Agregar el campo 'date'
+      const groupedAnswers = {
+        1: 0,
+        2: 0,
+        3: 0,
+        4: 0,
+        5: 0,
+        6: 0,
+      };
 
       user.answers.forEach(answer => {
-        userData.push(answer.answer);
+        const answerValue = answer.answer;
+        if (groupedAnswers.hasOwnProperty(answerValue)) {
+          groupedAnswers[answerValue]++;
+        }
       });
+
+      // Agregar las respuestas agrupadas a los datos del usuario
+      userData.push(groupedAnswers[1], groupedAnswers[2], groupedAnswers[3], groupedAnswers[4], groupedAnswers[5], groupedAnswers[6]);
+
 
       worksheet.addRow(userData);
     });
@@ -309,16 +323,29 @@ router.get('/download/csv', async (req, res) => {
     const csvData = [];
 
     // Agregar encabezados
-    csvData.push(['Name', 'Email','Answer 1', 'Answer 2','Answer 3', 'Answer 4','Answer 5', 'Answer 6','Answer 7', 'Answer 8','Answer 9', 'Answer 10','Answer 11', 'Answer 12','Answer 13', 'Answer 14','Answer 15' /* Agrega aquí las preguntas restantes */]);
+    csvData.push(['Name', 'Email','Aries', 'Tauro', 'Geminis', 'Cancer', 'Leo', 'Virgo']);
 
     // Agregar los datos de los usuarios
     users.forEach(user => {
-      const userData = [user.name];
-      userData.push(user.email);
-      user.answers.forEach(answer => {
-        userData.push(answer.answer);
-      });
+      const userData = [user.name,user.email];
 
+              // Crear un objeto para agrupar las respuestas por valor (1, 2, 3, 4, 5 o 6)
+              const groupedAnswers = {
+                1: 0,
+                2: 0,
+                3: 0,
+                4: 0,
+                5: 0,
+                6: 0,
+              };      
+
+      user.answers.forEach(answer => {
+        const answerValue = answer.answer;
+        if (groupedAnswers.hasOwnProperty(answerValue)) {
+          groupedAnswers[answerValue]++;
+        }
+      });
+      userData.push(groupedAnswers[1], groupedAnswers[2], groupedAnswers[3], groupedAnswers[4], groupedAnswers[5], groupedAnswers[6]);
       csvData.push(userData);
     });
 
