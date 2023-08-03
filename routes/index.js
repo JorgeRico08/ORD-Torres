@@ -49,7 +49,7 @@ router.post('/submit', async (req, res) => {
     const answers = [];
 
     // Recorrer las respuestas del formulario y almacenarlas en el formato deseado
-    for (let i = 1; i <= 15; i++) {
+    for (let i = 1; i <= 10; i++) {
       const question = `Question ${i}`;
       const answer = parseInt(req.body[`answer${i}`]);
       answers.push({ question, answer });
