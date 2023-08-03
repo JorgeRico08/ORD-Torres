@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 const Data = require('../models/Question_Model');
 const Swal = require('sweetalert2');
+
 /* GET home page. */
 // Ruta principal - Muestra todas las preguntas
 // router.get('/', async (req, res) => {
@@ -44,7 +45,7 @@ router.get('/', async (req, res) => {
 
 router.post('/submit', async (req, res) => {
   try {
-    const { name, email } = req.body;
+    const { name, email, date } = req.body;
     const answers = [];
 
     // Recorrer las respuestas del formulario y almacenarlas en el formato deseado
@@ -53,11 +54,11 @@ router.post('/submit', async (req, res) => {
       const answer = parseInt(req.body[`answer${i}`]);
       answers.push({ question, answer });
     }
+    console.log(determinarSignoZodiacal(date))
+    const signo =  determinarSignoZodiacal(date);
 
-    // Crear un nuevo usuario con los datos recibidos
-    const user = new Data({ name, email, answers });
+    const user = new Data({ name, email, answers, signo });
   
-    // Guardar el usuario en la base de datos
     await user.save();
     res.redirect('/')
   } catch (error) {
@@ -85,6 +86,13 @@ router.post('/submit', async (req, res) => {
 router.get('/success/1220100446', async (req, res) => {
   try {
     const users = await Data.find();
+    // const mexicanNames = generateMexicanUserData(1000);
+    // const data = await Data.insertMany(mexicanNames);
+    //   if (!data) {
+    //     console.log("No creado")
+    //   } else {
+    //     console.log("Creado")
+    //   }
 
     res.render('success', { users: users });
   } catch (err) {
@@ -93,104 +101,149 @@ router.get('/success/1220100446', async (req, res) => {
   }
 });
 
-// function determinarSignoZodiacal(fechaNacimiento) {
-//   const fecha = new Date(fechaNacimiento);
-//   const mes = fecha.getMonth() + 1; // Los meses en JavaScript son indexados desde 0, por eso se suma 1
+function generateMexicanUserData(count) {
+  const userData = [];
 
-//   let signoZodiacal = '';
+  const nombres = [
+    'José', 'María', 'Juan', 'Ana', 'Miguel', 'Laura', 'Carlos', 'Sofía', 'Diego', 'Valentina',
+    'Alejandro', 'Fernanda', 'Joaquín', 'Isabella', 'Francisco', 'Camila', 'Luis', 'Valeria',
+    'Ricardo', 'Ximena', 'Javier', 'Mariana', 'Héctor', 'Lucía', 'Andrés', 'Regina', 'Daniel',
+    'Elena', 'Gabriel', 'Fátima', 'Antonio', 'Diana', 'Rafael', 'Jimena', 'Samuel', 'Paola',
+    'Fernando', 'Adriana', 'Alberto', 'Mónica', 'Emilio', 'Claudia', 'Eduardo', 'Bianca',
+    'Guillermo', 'Michelle', 'Arturo', 'Karla', 'Ángel', 'Paulina',
+    // Agrega más nombres mexicanos
+    'Rosa', 'Santiago', 'Catalina', 'Hugo', 'Alicia', 'Isaac', 'Beatriz', 'Leonardo', 'Constanza',
+    'Sebastián', 'Olivia', 'Emanuel', 'Daniela', 'Nicolás', 'Montserrat', 'Matías', 'Natalia',
+    'Vicente', 'Giselle', 'Saúl', 'Renata', 'Oscar', 'Mara', 'Eduardo', 'Abril', 'Gael', 'Victoria',
+    'Rubén', 'Liliana', 'Raúl', 'Ana Sofía', 'Salvador', 'Xiomara', 'Mateo', 'Perla', 'Julio',
+    'Renata', 'Julian', 'Regina', 'Alan', 'Berenice', 'Pedro', 'Citlalli', 'Armando', 'Karina',
+    'Enrique', 'Estefanía', 'Uriel', 'Luciana', 'Felipe', 'Adrián', 'Bruno', 'Araceli', 'Mauricio',
+    'Valeria', 'Alexis', 'Julieta', 'Damián', 'Carolina', 'Josué', 'Miranda', 'Benjamín', 'Montserrat',
+    'Cristian', 'Zoe', 'Jorge', 'Rocío', 'Rodrigo', 'Regina'
+  ];
 
-//   switch (mes) {
-//     case 1: // Enero
-//       if (fecha.getDate() >= 20) {
-//         signoZodiacal = 'Acuario';
-//       } else {
-//         signoZodiacal = 'Capricornio';
-//       }
-//       break;
-//     case 2: // Febrero
-//       if (fecha.getDate() >= 19) {
-//         signoZodiacal = 'Piscis';
-//       } else {
-//         signoZodiacal = 'Acuario';
-//       }
-//       break;
-//     case 3: // Marzo
-//       if (fecha.getDate() >= 21) {
-//         signoZodiacal = 'Aries';
-//       } else {
-//         signoZodiacal = 'Piscis';
-//       }
-//       break;
-//     case 4: // Abril
-//       if (fecha.getDate() >= 20) {
-//         signoZodiacal = 'Tauro';
-//       } else {
-//         signoZodiacal = 'Aries';
-//       }
-//       break;
-//     case 5: // Mayo
-//       if (fecha.getDate() >= 21) {
-//         signoZodiacal = 'Géminis';
-//       } else {
-//         signoZodiacal = 'Tauro';
-//       }
-//       break;
-//     case 6: // Junio
-//       if (fecha.getDate() >= 21) {
-//         signoZodiacal = 'Cáncer';
-//       } else {
-//         signoZodiacal = 'Géminis';
-//       }
-//       break;
-//     case 7: // Julio
-//       if (fecha.getDate() >= 23) {
-//         signoZodiacal = 'Leo';
-//       } else {
-//         signoZodiacal = 'Cáncer';
-//       }
-//       break;
-//     case 8: // Agosto
-//       if (fecha.getDate() >= 23) {
-//         signoZodiacal = 'Virgo';
-//       } else {
-//         signoZodiacal = 'Leo';
-//       }
-//       break;
-//     case 9: // Septiembre
-//       if (fecha.getDate() >= 23) {
-//         signoZodiacal = 'Libra';
-//       } else {
-//         signoZodiacal = 'Virgo';
-//       }
-//       break;
-//     case 10: // Octubre
-//       if (fecha.getDate() >= 23) {
-//         signoZodiacal = 'Escorpio';
-//       } else {
-//         signoZodiacal = 'Libra';
-//       }
-//       break;
-//     case 11: // Noviembre
-//       if (fecha.getDate() >= 22) {
-//         signoZodiacal = 'Sagitario';
-//       } else {
-//         signoZodiacal = 'Escorpio';
-//       }
-//       break;
-//     case 12: // Diciembre
-//       if (fecha.getDate() >= 22) {
-//         signoZodiacal = 'Capricornio';
-//       } else {
-//         signoZodiacal = 'Sagitario';
-//       }
-//       break;
-//     default:
-//       signoZodiacal = 'No válido';
-//       break;
-//   }
+  const zoc = [
+    'Aries','Tauro','Geminis','Cancer','Leo','Virgo'
+  ]
 
-//   return signoZodiacal;
-// }
+  for (let i = 0; i < count; i++) {
+    const name = nombres[Math.floor(Math.random() * nombres.length)];
+    const signo = zoc[Math.floor(Math.random() * zoc.length)];
+    const email = `${name.replace(' ', '').toLowerCase()}@gmail.com`;
+
+    const answers = [];
+
+    for (let j = 0; j < 10; j++) {
+      const question = `Question ${j + 1}`;
+      const answer = Math.floor(Math.random() * 6) + 1;
+
+      answers.push({ question, answer });
+    }
+
+    userData.push({ name, email, signo, answers });
+  }
+
+  return userData;
+}
+
+function determinarSignoZodiacal(fechaNacimiento) {
+  const fecha = new Date(fechaNacimiento);
+  const mes = fecha.getMonth() + 1; // Los meses en JavaScript son indexados desde 0, por eso se suma 1
+
+  let signoZodiacal = '';
+
+  switch (mes) {
+    case 1: // Enero
+      if (fecha.getDate() >= 20) {
+        signoZodiacal = 'Acuario';
+      } else {
+        signoZodiacal = 'Capricornio';
+      }
+      break;
+    case 2: // Febrero
+      if (fecha.getDate() >= 19) {
+        signoZodiacal = 'Piscis';
+      } else {
+        signoZodiacal = 'Acuario';
+      }
+      break;
+    case 3: // Marzo
+      if (fecha.getDate() >= 21) {
+        signoZodiacal = 'Aries';
+      } else {
+        signoZodiacal = 'Piscis';
+      }
+      break;
+    case 4: // Abril
+      if (fecha.getDate() >= 20) {
+        signoZodiacal = 'Tauro';
+      } else {
+        signoZodiacal = 'Aries';
+      }
+      break;
+    case 5: // Mayo
+      if (fecha.getDate() >= 21) {
+        signoZodiacal = 'Géminis';
+      } else {
+        signoZodiacal = 'Tauro';
+      }
+      break;
+    case 6: // Junio
+      if (fecha.getDate() >= 21) {
+        signoZodiacal = 'Cáncer';
+      } else {
+        signoZodiacal = 'Géminis';
+      }
+      break;
+    case 7: // Julio
+      if (fecha.getDate() >= 23) {
+        signoZodiacal = 'Leo';
+      } else {
+        signoZodiacal = 'Cáncer';
+      }
+      break;
+    case 8: // Agosto
+      if (fecha.getDate() >= 23) {
+        signoZodiacal = 'Virgo';
+      } else {
+        signoZodiacal = 'Leo';
+      }
+      break;
+    case 9: // Septiembre
+      if (fecha.getDate() >= 23) {
+        signoZodiacal = 'Libra';
+      } else {
+        signoZodiacal = 'Virgo';
+      }
+      break;
+    case 10: // Octubre
+      if (fecha.getDate() >= 23) {
+        signoZodiacal = 'Escorpio';
+      } else {
+        signoZodiacal = 'Libra';
+      }
+      break;
+    case 11: // Noviembre
+      if (fecha.getDate() >= 22) {
+        signoZodiacal = 'Sagitario';
+      } else {
+        signoZodiacal = 'Escorpio';
+      }
+      break;
+    case 12: // Diciembre
+      if (fecha.getDate() >= 22) {
+        signoZodiacal = 'Capricornio';
+      } else {
+        signoZodiacal = 'Sagitario';
+      }
+      break;
+    default:
+      signoZodiacal = 'No válido';
+      break;
+  }
+
+  return signoZodiacal;
+}
 
 const ExcelJS = require('exceljs');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
@@ -205,11 +258,11 @@ router.get('/download/excel', async (req, res) => {
     const worksheet = workbook.addWorksheet('Users');
 
     // Escribir los encabezados en el archivo Excel
-    worksheet.addRow(['Name', 'Email','Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo']);
+    worksheet.addRow(['Name', 'Email', 'Signo', 'Energetico', 'Pasiente', 'Inteligente', 'Emocional', 'Carismatico', 'Detallista']);
 
     // Escribir los datos en el archivo Excel
     users.forEach(user => {
-      const userData = [user.name, user.email];
+      const userData = [user.name, user.email, user.signo];
 
       const groupedAnswers = {
         1: 0,
@@ -323,11 +376,11 @@ router.get('/download/csv', async (req, res) => {
     const csvData = [];
 
     // Agregar encabezados
-    csvData.push(['Name', 'Email','Aries', 'Tauro', 'Geminis', 'Cancer', 'Leo', 'Virgo']);
+    csvData.push(['Name', 'Email', 'Signo', 'Energetico', 'Pasiente', 'Inteligente', 'Emocional', 'Carismatico', 'Detallista']);
 
     // Agregar los datos de los usuarios
     users.forEach(user => {
-      const userData = [user.name,user.email];
+      const userData = [user.name,user.email, user.signo];
 
               // Crear un objeto para agrupar las respuestas por valor (1, 2, 3, 4, 5 o 6)
               const groupedAnswers = {
